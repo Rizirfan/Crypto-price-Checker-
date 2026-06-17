@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crypto Price Checker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+:root{
+      /* Apple-like glass (vibrancy + depth) */
+      --bg: #070A12;
+      --glass-1: rgba(255,255,255,0.10);
+      --glass-2: rgba(255,255,255,0.06);
+      --glass-3: rgba(255,255,255,0.035);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --border: rgba(255,255,255,0.16);
+      --shadow: 0 24px 70px rgba(0,0,0,0.55);
+      --accent: #8b5cf6;
+      --accent-2: #22c55e;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --radius: 20px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 720px at 12% 8%, rgba(139,92,246,0.35), transparent 55%),
+        radial-gradient(900px 600px at 88% 26%, rgba(34,197,94,0.22), transparent 55%),
+        radial-gradient(700px 520px at 52% 92%, rgba(59,130,246,0.18), transparent 58%),
+        linear-gradient(180deg, #05070D 0%, #070A12 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 24px;
+    }
+
+    .app{
+      width:min(1020px, 100%);
+      display:grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 920px){
+      .app{grid-template-columns: 1fr;}
+    }
+
+.card{
+      background:
+        linear-gradient(180deg, var(--glass-1), var(--glass-2));
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(18px) saturate(150%);
+      -webkit-backdrop-filter: blur(18px) saturate(150%);
+      position: relative;
+    }
+
+    .card::before{
+      content: "";
+      position:absolute;
+      inset:-1px;
+      background:
+        radial-gradient(500px 240px at 10% 5%, rgba(255,255,255,0.18), transparent 45%),
+        radial-gradient(380px 220px at 90% 30%, rgba(124,58,237,0.20), transparent 55%),
+        radial-gradient(320px 200px at 50% 110%, rgba(34,197,94,0.12), transparent 60%);
+      pointer-events:none;
+      opacity:0.9;
+      mix-blend-mode: screen;
+    }
+
+    .card > *{ position: relative; }
+
+    .hero{
+      padding: 20px 20px 16px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom: 10px;
+    }
+
+    .logo{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), transparent 55%),
+        linear-gradient(135deg, rgba(124,58,237,0.95), rgba(34,197,94,0.75));
+      border: 1px solid rgba(255,255,255,0.22);
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex: 0 0 auto;
+    }
+
+    .logo svg{filter: drop-shadow(0 10px 20px rgba(0,0,0,0.35));}
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      line-height:1.15;
+    }
+
+    .title h1{
+      font-size: 16px;
+      margin:0;
+      font-weight: 600;
+      letter-spacing:0.2px;
+    }
+
+    .title p{
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .controls{
+      padding: 0 20px 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    @media (max-width: 520px){
+      .row{flex-direction:column; align-items:stretch;}
+    }
+
+    .field{
+      flex: 1;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+
+    label{
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    input[type="text"], select{
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.16);
+      color: var(--text);
+      padding: 12px 12px;
+      outline:none;
+      transition: border-color .15s ease, transform .06s ease;
+    }
+
+    input[type="text"]:focus, select:focus{
+      border-color: rgba(124,58,237,0.55);
+    }
+
+    button{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: linear-gradient(135deg, rgba(124,58,237,0.95), rgba(34,197,94,0.75));
+      color: white;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 600;
+      cursor:pointer;
+      transition: transform .06s ease, filter .2s ease;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    button:active{transform: translateY(1px);}
+    button:hover{filter: brightness(1.03);}
+
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 0 20px 18px;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .kbd{
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.18);
+      color: rgba(255,255,255,0.78);
+    }
+
+    .list{
+      padding: 14px;
+    }
+
+    .listHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 10px 10px 14px;
+    }
+
+    .listHeader h2{
+      margin:0;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.88);
+    }
+
+    .pill{
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+
+    .dot{
+      width:8px; height:8px; border-radius:50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34,197,94,0.18);
+    }
+
+    .dot.loading{
+      background: #f59e0b;
+      box-shadow: 0 0 0 4px rgba(245,158,11,0.18);
+    }
+
+    .dot.error{
+      background: #ef4444;
+      box-shadow: 0 0 0 4px rgba(239,68,68,0.18);
+    }
+
+    .table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing: 0 10px;
+      padding: 0 6px 14px;
+    }
+
+    .tr{
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      overflow:hidden;
+    }
+
+    .tableRow{
+      display:grid;
+      grid-template-columns: 1.2fr 0.9fr 0.9fr;
+      gap: 10px;
+      align-items:center;
+      padding: 12px 12px;
+      margin-bottom: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+    }
+
+    @media (max-width: 920px){
+      .tableRow{grid-template-columns: 1.4fr 1fr;}
+      .hide-sm{display:none;}
+    }
+
+    .coin{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .coin img{
+      width: 26px;
+      height: 26px;
+      border-radius: 9px;
+      background: rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.12);
+      flex: 0 0 auto;
+    }
+
+    .coinText{
+      display:flex;
+      flex-direction:column;
+      min-width: 0;
+    }
+
+    .coinText .name{
+      font-weight: 600;
+      font-size: 13.5px;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space:nowrap;
+    }
+
+    .coinText .sym{
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .price{
+      font-variant-numeric: tabular-nums;
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.92);
+      font-weight: 600;
+      white-space:nowrap;
+    }
+
+    .change{
+      font-variant-numeric: tabular-nums;
+      font-size: 13px;
+      font-weight: 600;
+      white-space:nowrap;
+      justify-self:end;
+    }
+
+    .pos{color: rgba(34,197,94,0.95)}
+    .neg{color: rgba(239,68,68,0.95)}
+
+    .empty{
+      color: var(--muted);
+      text-align:center;
+      padding: 26px 10px;
+      border: 1px dashed rgba(255,255,255,0.18);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .footerNote{
+      padding: 0 20px 18px;
+      color: rgba(255,255,255,0.62);
+      font-size: 12px;
+      line-height:1.35;
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 18px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: blur(10px);
+      color: rgba(255,255,255,0.9);
+      padding: 10px 12px;
+      border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      font-size: 13px;
+      display:none;
+      max-width: min(520px, calc(100% - 32px));
+    }
+
+    .toast.show{display:block;}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="card" aria-label="Controls">
+      <div class="hero">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C7.03 2 3 6.03 3 11C3 15.97 7.03 20 12 20C16.97 20 21 15.97 21 11C21 6.03 16.97 2 12 2Z" stroke="white" stroke-opacity="0.9" stroke-width="1.6"/>
+              <path d="M12 6V16" stroke="white" stroke-opacity="0.95" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M8 9.5C8.7 8.4 10.1 7.8 11.6 8.0C13.3 8.2 14.3 9.1 14.3 10.3C14.3 12.3 11.5 12.1 10.6 13.0C9.9 13.7 10.0 15.0 11.6 15.4C13.0 15.7 14.0 14.9 14.4 14.3" stroke="white" stroke-opacity="0.95" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="title">
+            <h1>Crypto Price Checker</h1>
+            <p>Fast, minimal, live prices (public API)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="row">
+          <div class="field">
+            <label for="query">Coins</label>
+            <input id="query" type="text" placeholder="e.g., bitcoin, ethereum, solana" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="currency">Currency</label>
+            <select id="currency">
+              <option value="usd" selected>USD ($)</option>
+              <option value="eur">EUR (€)</option>
+              <option value="gbp">GBP (£)</option>
+              <option value="inr">INR (₹)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <button id="refreshBtn" type="button" title="Fetch latest prices">
+            <span id="btnIcon" aria-hidden="true">⟳</span>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div>Tip: press <span class="kbd">Enter</span> to refresh</div>
+        <div id="statusText">Ready</div>
+      </div>
+
+      <div class="footerNote">
+        Data source: CoinGecko (public, no API key). Note: free usage is rate-limited.
+      </div>
+    </section>
+
+    <section class="card" aria-label="Results">
+      <div class="list">
+        <div class="listHeader">
+          <h2>Live prices</h2>
+          <div class="pill" id="pill">
+            <span id="statusDot" class="dot" aria-hidden="true"></span>
+            <span id="pillText">Online</span>
+          </div>
+        </div>
+
+        <div id="empty" class="empty">Type coins on the left, then refresh.</div>
+        <div id="rows" style="display:none"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // CoinGecko API: https://www.coingecko.com/en/api/documentation
+    const COINGECKO_SIMPLE_PRICE = 'https://api.coingecko.com/api/v3/simple/price';
+    const COINGECKO_MARKETS = 'https://api.coingecko.com/api/v3/coins/';
+
+    const $ = (sel) => document.querySelector(sel);
+
+    const queryEl = $('#query');
+    const currencyEl = $('#currency');
+    const refreshBtn = $('#refreshBtn');
+
+    const rowsEl = $('#rows');
+    const emptyEl = $('#empty');
+    const statusTextEl = $('#statusText');
+    const statusDotEl = $('#statusDot');
+    const pillTextEl = $('#pillText');
+
+    const toastEl = $('#toast');
+
+    const DEFAULT_COINS = ['bitcoin','ethereum','solana'];
+
+    function showToast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>toastEl.classList.remove('show'), 3000);
+    }
+
+    function setStatus({text, mode='ok'}){
+      statusTextEl.textContent = text;
+      statusDotEl.classList.remove('loading','error');
+      if(mode === 'loading') statusDotEl.classList.add('loading');
+      if(mode === 'error') statusDotEl.classList.add('error');
+      pillTextEl.textContent = text;
+    }
+
+    function normalizeCoins(input){
+      const parts = (input || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+      return parts.length ? parts : DEFAULT_COINS;
+    }
+
+    function formatPrice(n, currency){
+      if(!Number.isFinite(n)) return '—';
+      try{
+        return new Intl.NumberFormat(undefined, { style:'currency', currency: currency.toUpperCase() }).format(n);
+      }catch{
+        // Fallback for currencies unsupported by Intl
+        return n.toFixed(2) + ' ' + currency.toUpperCase();
+      }
+    }
+
+    function makeRow({id, name, symbol, price, change24h}){
+      const pos = change24h == null ? false : change24h >= 0;
+      const changeClass = change24h == null ? '' : pos ? 'pos' : 'neg';
+      const changeText = change24h == null ? '24h —' : `24h ${pos ? '+' : ''}${change24h.toFixed(2)}%`;
+
+      const iconUrl = name ? `${COINGECKO_MARKETS}${id}.html` : '';
+      // We can’t reliably get icons from this endpoint; use a stable icon URL pattern.
+      // CoinGecko icon CDN pattern: https://assets.coingecko.com/coins/images/{id}/{id}_small.png is not universal.
+      // Instead, use a best-effort icon via the coin endpoint’s HTML is not feasible.
+      // We'll keep icon blank unless we successfully fetch coin image.
+
+      const imgSrc = '';
+
+      const div = document.createElement('div');
+      div.className = 'tableRow';
+      div.setAttribute('data-coin', id);
+
+      div.innerHTML = `
+        <div class="coin">
+          <img alt="" src="${imgSrc}" onerror="this.style.display='none'" />
+          <div class="coinText">
+            <div class="name">${name || id}</div>
+            <div class="sym">${(symbol || id).toUpperCase()}</div>
+          </div>
+        </div>
+        <div class="price">${formatPrice(price, currencyEl.value)}</div>
+        <div class="change hide-sm ${changeClass}">${changeText}</div>
+      `;
+      return div;
+    }
+
+    async function fetchPricesAndChanges(coins, currency){
+      // simple/price gives price only. For 24h % we need extra calls per coin.
+      // Keep it minimal: call coin detail endpoint for each coin (still public; rate-limited).
+      // Endpoint: /coins/{id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false
+      const priceUrl = `${COINGECKO_SIMPLE_PRICE}?ids=${encodeURIComponent(coins.join(','))}&vs_currencies=${encodeURIComponent(currency)}&include_24hr_change=true`;
+
+      const resp = await fetch(priceUrl, { headers: { 'accept': 'application/json' } });
+      if(!resp.ok) throw new Error(`Failed price fetch (${resp.status})`);
+      const priceData = await resp.json();
+
+      // Now fetch 24h change percent, already included as *_24h_change.
+      // We can just read it from priceData.
+      return priceData;
+    }
+
+    async function refresh(){
+      const coins = normalizeCoins(queryEl.value);
+      const currency = currencyEl.value;
+
+      rowsEl.style.display = 'none';
+      emptyEl.style.display = 'block';
+
+      setStatus({text:'Refreshing…', mode:'loading'});
+
+      const btnText = refreshBtn.innerHTML;
+      refreshBtn.disabled = true;
+      refreshBtn.style.opacity = '0.85';
+
+      try{
+        const data = await fetchPricesAndChanges(coins, currency);
+
+        rowsEl.innerHTML = '';
+        let shown = 0;
+
+        for(const id of coins){
+          const item = data[id];
+          if(!item){
+            // Skip unknown id
+            continue;
+          }
+          const price = item[currency];
+          const change24h = item[`${currency}_24h_change`];
+
+          // Name/symbol: we don't have them from simple/price.
+          // Use id as a minimal display.
+          const row = makeRow({ id, name: id, symbol: id.slice(0, Math.min(6, id.length)), price, change24h });
+          rowsEl.appendChild(row);
+          shown++;
+        }
+
+        if(shown === 0){
+          emptyEl.style.display = 'block';
+          emptyEl.textContent = 'No matching coins found. Try using CoinGecko ids (e.g., bitcoin, ethereum).';
+          setStatus({text:'Check coin ids', mode:'error'});
+        } else {
+          emptyEl.style.display = 'none';
+          rowsEl.style.display = 'block';
+          setStatus({text:'Online', mode:'ok'});
+        }
+      }catch(err){
+        console.error(err);
+        emptyEl.style.display = 'block';
+        emptyEl.textContent = 'Could not fetch prices. Possibly rate-limited or network issue.';
+        setStatus({text:'Error', mode:'error'});
+        showToast(err?.message || 'Fetch error');
+      }finally{
+        refreshBtn.disabled = false;
+        refreshBtn.style.opacity = '1';
+        refreshBtn.innerHTML = btnText;
+      }
+    }
+
+    refreshBtn.addEventListener('click', refresh);
+    queryEl.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        refresh();
+      }
+    });
+    currencyEl.addEventListener('change', ()=> refresh());
+
+    // Initial load
+    queryEl.value = DEFAULT_COINS.join(', ');
+    refresh();
+  </script>
+</body>
+</html>
+
